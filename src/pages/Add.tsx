@@ -1,7 +1,7 @@
 
 import { nanoid } from 'nanoid';
 import { ResourceFormData } from '@/types';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { uploadFile } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
@@ -13,7 +13,7 @@ const Add = () => {
   
   const handleSubmit = async (data: ResourceFormData) => {
     try {
-      let filePath = null;
+      let fileUrl = null;
       
       // Upload file if provided
       if (data.file) {
@@ -21,7 +21,14 @@ const Add = () => {
         const fileName = `${nanoid()}.${fileExt}`;
         const folderPath = `uploads/${fileName}`;
         
-        filePath = await uploadFile(data.file, folderPath);
+        try {
+          fileUrl = await uploadFile(data.file, folderPath);
+          console.log('File uploaded successfully:', fileUrl);
+        } catch (fileError) {
+          console.error('File upload error:', fileError);
+          toast.error('Failed to upload file. Please try again.');
+          // Continue with resource creation without file
+        }
       }
       
       // Save resource to database
@@ -30,7 +37,7 @@ const Add = () => {
         description: data.description,
         type: data.type,
         url: data.url || null,
-        file_path: filePath,
+        file_path: fileUrl,
       });
       
       if (error) {

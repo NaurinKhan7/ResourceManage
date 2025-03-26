@@ -7,18 +7,35 @@ const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYm
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export const uploadFile = async (file: File, path: string) => {
-  const { data, error } = await supabase.storage
-    .from('resource-files')
-    .upload(path, file, {
-      cacheControl: '3600',
-      upsert: true
-    });
+  try {
+    console.log('Uploading file to path:', path);
+    const { data, error } = await supabase.storage
+      .from('resource-files')
+      .upload(path, file, {
+        cacheControl: '3600',
+        upsert: true
+      });
 
-  if (error) {
-    throw new Error(error.message);
+    if (error) {
+      console.error('Storage upload error:', error);
+      throw new Error(error.message);
+    }
+
+    if (!data) {
+      throw new Error('Upload failed - no data returned');
+    }
+
+    // Get public URL for the uploaded file
+    const { data: urlData } = supabase.storage
+      .from('resource-files')
+      .getPublicUrl(data.path);
+    
+    console.log('File uploaded successfully, public URL:', urlData.publicUrl);
+    return urlData.publicUrl;
+  } catch (error) {
+    console.error('File upload failed:', error);
+    throw error;
   }
-
-  return data.path;
 };
 
 export const getFileUrl = (path: string) => {

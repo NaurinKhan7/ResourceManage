@@ -6,7 +6,8 @@ import { toast } from 'sonner';
 import { nanoid } from 'nanoid';
 import { Loader2 } from 'lucide-react';
 import { ResourceFormData } from '@/types';
-import { supabase, uploadFile } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
+import { uploadFile, deleteFile } from '@/lib/supabase';
 import Navbar from '@/components/Navbar';
 import ResourceForm from '@/components/ResourceForm';
 
@@ -44,39 +45,62 @@ const Edit = () => {
   const handleSubmit = async (data: ResourceFormData) => {
     if (!id) return;
     
-    let filePath = resource?.file_path;
-    
-    // Upload new file if provided
-    if (data.file) {
-      const fileExt = data.file.name.split('.').pop();
-      const fileName = `${nanoid()}.${fileExt}`;
-      const folderPath = `uploads/${fileName}`;
+    try {
+      let fileUrl = resource?.file_path;
       
-      // Delete old file if exists
-      if (resource?.file_path) {
-        await supabase.storage
-          .from('resource-files')
-          .remove([resource.file_path]);
+      // Upload new file if provided
+      if (data.file) {
+        const fileExt = data.file.name.split('.').pop();
+        const fileName = `${nanoid()}.${fileExt}`;
+        const folderPath = `uploads/${fileName}`;
+        
+        // Delete old file if exists
+        if (resource?.file_path) {
+          try {
+            const filePath = resource.file_path.split('/').pop();
+            if (filePath) {
+              await deleteFile(`uploads/${filePath}`);
+            }
+          } catch (deleteError) {
+            console.error('Error deleting old file:', deleteError);
+            // Continue with update even if deletion fails
+          }
+        }
+        
+        // Upload new file
+        try {
+          fileUrl = await uploadFile(data.file, folderPath);
+        } catch (uploadError) {
+          console.error('Error uploading new file:', uploadError);
+          toast.error('Failed to upload file. Continuing with other updates.');
+          // Continue with update even if upload fails
+        }
       }
       
-      filePath = await uploadFile(data.file, folderPath);
-    }
-    
-    // Update resource in database
-    const { error } = await supabase
-      .from('resources')
-      .update({
-        title: data.title,
-        description: data.description,
-        type: data.type,
-        url: data.url || null,
-        file_path: filePath,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', id);
-    
-    if (error) {
-      throw error;
+      // Update resource in database
+      const { error } = await supabase
+        .from('resources')
+        .update({
+          title: data.title,
+          description: data.description,
+          type: data.type,
+          url: data.url || null,
+          file_path: fileUrl,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', id);
+      
+      if (error) {
+        console.error('Error updating resource:', error);
+        toast.error(`Error updating resource: ${error.message}`);
+        throw error;
+      }
+      
+      toast.success('Resource updated successfully');
+      navigate('/');
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      toast.error('Failed to update resource. Please try again.');
     }
   };
   
