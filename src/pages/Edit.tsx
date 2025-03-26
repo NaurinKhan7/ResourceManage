@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -6,7 +5,7 @@ import { toast } from 'sonner';
 import { nanoid } from 'nanoid';
 import { Loader2 } from 'lucide-react';
 import { ResourceFormData } from '@/types';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabase';
 import { uploadFile, deleteFile } from '@/lib/supabase';
 import Navbar from '@/components/Navbar';
 import ResourceForm from '@/components/ResourceForm';
@@ -15,7 +14,6 @@ const Edit = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   
-  // Fetch resource data
   const { data: resource, isLoading, isError } = useQuery({
     queryKey: ['resource', id],
     queryFn: async () => {
@@ -34,7 +32,6 @@ const Edit = () => {
     },
   });
   
-  // Redirect if resource not found
   useEffect(() => {
     if (isError) {
       toast.error('Resource not found');
@@ -48,13 +45,11 @@ const Edit = () => {
     try {
       let fileUrl = resource?.file_url;
       
-      // Upload new file if provided
       if (data.file) {
         const fileExt = data.file.name.split('.').pop();
         const fileName = `${nanoid()}.${fileExt}`;
         const folderPath = `uploads/${fileName}`;
         
-        // Delete old file if exists
         if (resource?.file_url) {
           try {
             const filePath = resource.file_url.split('/').pop();
@@ -67,7 +62,6 @@ const Edit = () => {
           }
         }
         
-        // Upload new file
         try {
           fileUrl = await uploadFile(data.file, folderPath);
         } catch (uploadError) {
@@ -77,7 +71,6 @@ const Edit = () => {
         }
       }
       
-      // Update resource in database
       const { error } = await supabase
         .from('resources')
         .update({

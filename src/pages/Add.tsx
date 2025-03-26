@@ -1,7 +1,6 @@
-
 import { nanoid } from 'nanoid';
 import { ResourceFormData } from '@/types';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabase';
 import { uploadFile } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
@@ -30,6 +29,15 @@ const Add = () => {
           // Continue with resource creation without file
         }
       }
+      
+      // Add console logs to debug the insert operation
+      console.log('Inserting resource with data:', {
+        title: data.title,
+        description: data.description,
+        type: data.type,
+        url: data.url || null,
+        file_url: fileUrl,
+      });
       
       // Save resource to database
       const { error } = await supabase.from('resources').insert({

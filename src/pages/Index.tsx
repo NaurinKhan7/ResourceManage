@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -20,34 +19,33 @@ const Index = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('all');
 
-  // Fetch resources
   const { data: resources, isLoading, isError, refetch } = useQuery({
     queryKey: ['resources'],
     queryFn: async () => {
+      console.log('Fetching resources...');
       const { data, error } = await supabase
         .from('resources')
         .select('*')
         .order('updated_at', { ascending: false });
       
       if (error) {
+        console.error('Error fetching resources:', error);
         throw new Error(error.message);
       }
       
+      console.log('Resources fetched successfully:', data);
       return data as Resource[];
     },
   });
 
-  // Handle resource deletion
   const handleDelete = async (id: number) => {
     try {
-      // Get resource info for file deletion if needed
       const { data: resource } = await supabase
         .from('resources')
         .select('file_url')
         .eq('id', id)
         .single();
       
-      // Delete from database
       const { error } = await supabase
         .from('resources')
         .delete()
@@ -55,7 +53,6 @@ const Index = () => {
       
       if (error) throw error;
       
-      // Delete file if it exists
       if (resource?.file_url) {
         await supabase.storage
           .from('resource-files')
@@ -70,7 +67,6 @@ const Index = () => {
     }
   };
 
-  // Filter resources
   const filteredResources = resources?.filter(resource => {
     const matchesSearch = searchQuery === '' || 
       resource.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
