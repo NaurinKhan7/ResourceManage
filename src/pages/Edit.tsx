@@ -46,7 +46,7 @@ const Edit = () => {
     if (!id) return;
     
     try {
-      let fileUrl = resource?.file_path;
+      let fileUrl = resource?.file_url; // Changed from file_path to file_url
       
       // Upload new file if provided
       if (data.file) {
@@ -55,9 +55,9 @@ const Edit = () => {
         const folderPath = `uploads/${fileName}`;
         
         // Delete old file if exists
-        if (resource?.file_path) {
+        if (resource?.file_url) { // Changed from file_path to file_url
           try {
-            const filePath = resource.file_path.split('/').pop();
+            const filePath = resource.file_url.split('/').pop(); // Changed from file_path to file_url
             if (filePath) {
               await deleteFile(`uploads/${filePath}`);
             }
@@ -85,7 +85,7 @@ const Edit = () => {
           description: data.description,
           type: data.type,
           url: data.url || null,
-          file_path: fileUrl,
+          file_url: fileUrl, // Changed from file_path to file_url
           updated_at: new Date().toISOString(),
         })
         .eq('id', id);
@@ -118,7 +118,7 @@ const Edit = () => {
         description: resource.description,
         type: resource.type as ResourceFormData['type'],
         url: resource.url || '',
-        file_path: resource.file_path,
+        file_url: resource.file_url, // Changed from file_path to file_url
       }
     : {
         title: '',

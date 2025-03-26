@@ -7,7 +7,7 @@ export interface Resource {
   description: string;
   type: ResourceType;
   url?: string;
-  file_path?: string;
+  file_url?: string; // Changed from file_path to file_url to match the database
   created_at: string;
   updated_at: string;
 }
@@ -20,5 +20,5 @@ export type ResourceFormData = {
   type: ResourceType;
   url?: string;
   file?: File | null;
-  file_path?: string;
+  file_url?: string; // Changed from file_path to file_url
 };

@@ -163,9 +163,9 @@ const ResourceForm = ({ initialData, onSubmit, isEditMode = false }: ResourceFor
                     {...fieldProps}
                     className="file:mr-4 file:px-4 file:py-2 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
                   />
-                  {initialData?.file_path && isEditMode && (
+                  {initialData?.file_url && isEditMode && (
                     <span className="text-sm text-muted-foreground">
-                      Current file: {initialData.file_path.split('/').pop()}
+                      Current file: {initialData.file_url.split('/').pop()}
                     </span>
                   )}
                 </div>
