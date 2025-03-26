@@ -43,7 +43,7 @@ const Index = () => {
       // Get resource info for file deletion if needed
       const { data: resource } = await supabase
         .from('resources')
-        .select('file_path')
+        .select('file_url')
         .eq('id', id)
         .single();
       
@@ -56,10 +56,10 @@ const Index = () => {
       if (error) throw error;
       
       // Delete file if it exists
-      if (resource?.file_path) {
+      if (resource?.file_url) {
         await supabase.storage
           .from('resource-files')
-          .remove([resource.file_path]);
+          .remove([resource.file_url]);
       }
       
       refetch();

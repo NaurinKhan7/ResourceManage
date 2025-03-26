@@ -37,7 +37,7 @@ const Add = () => {
         description: data.description,
         type: data.type,
         url: data.url || null,
-        file_url: fileUrl, // Changed from file_path to file_url
+        file_url: fileUrl,
       });
       
       if (error) {

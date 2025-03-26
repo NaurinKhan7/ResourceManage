@@ -99,9 +99,9 @@ const ResourceCard = ({ resource, onDelete }: ResourceCardProps) => {
             </a>
           )}
           
-          {resource.file_path && (
+          {resource.file_url && (
             <a 
-              href={getFileUrl(resource.file_path)} 
+              href={getFileUrl(resource.file_url)} 
               target="_blank" 
               rel="noopener noreferrer"
               className="flex items-center text-sm text-primary hover:underline"
