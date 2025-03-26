@@ -116,7 +116,7 @@ const Edit = () => {
     ? {
         title: resource.title,
         description: resource.description,
-        type: resource.type,
+        type: resource.type as ResourceFormData['type'],
         url: resource.url || '',
         file_path: resource.file_path,
       }
