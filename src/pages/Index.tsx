@@ -38,7 +38,7 @@ const Index = () => {
     },
   });
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     try {
       const { data: resource } = await supabase
         .from('resources')
@@ -152,3 +152,4 @@ const Index = () => {
 };
 
 export default Index;
+

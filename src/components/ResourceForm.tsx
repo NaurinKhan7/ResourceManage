@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -43,6 +42,8 @@ type ResourceFormProps = {
 
 const ResourceForm = ({ initialData, onSubmit, isEditMode = false }: ResourceFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isVideo, setIsVideo] = useState(false);
   const navigate = useNavigate();
   
   const form = useForm<ResourceFormData>({
@@ -55,6 +56,23 @@ const ResourceForm = ({ initialData, onSubmit, isEditMode = false }: ResourceFor
       file: null,
     },
   });
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.type.startsWith('video/')) {
+        setIsVideo(true);
+        setPreviewUrl(URL.createObjectURL(file));
+      } else if (file.type.startsWith('image/')) {
+        setIsVideo(false);
+        setPreviewUrl(URL.createObjectURL(file));
+      }
+      form.setValue('file', file);
+    } else {
+      setPreviewUrl(null);
+      form.setValue('file', undefined);
+    }
+  };
 
   const handleSubmit = async (data: ResourceFormData) => {
     try {
@@ -154,24 +172,49 @@ const ResourceForm = ({ initialData, onSubmit, isEditMode = false }: ResourceFor
           name="file"
           render={({ field: { value, onChange, ...fieldProps } }) => (
             <FormItem>
-              <FormLabel>File Attachment (optional)</FormLabel>
+              <FormLabel>Media (optional)</FormLabel>
               <FormControl>
-                <div className="flex items-center gap-3">
+                <div className="space-y-4">
                   <Input
                     type="file"
-                    onChange={(e) => onChange(e.target.files?.[0] || null)}
+                    accept="image/*, video/*"
+                    onChange={handleFileChange}
                     {...fieldProps}
                     className="file:mr-4 file:px-4 file:py-2 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
                   />
+                  {previewUrl && isVideo && (
+                    <video 
+                      src={previewUrl} 
+                      controls
+                      className="max-h-64 w-full rounded-lg border mt-2"
+                    />
+                  )}
+                  {previewUrl && !isVideo && (
+                    <img 
+                      src={previewUrl} 
+                      alt="Preview" 
+                      className="max-h-64 w-full object-contain rounded-lg border mt-2"
+                    />
+                  )}
                   {initialData?.file_url && isEditMode && (
-                    <span className="text-sm text-muted-foreground">
-                      Current file: {initialData.file_url.split('/').pop()}
-                    </span>
+                    initialData.file_url.match(/\.(mp4|webm|ogg)$/i) ? (
+                      <video
+                        src={initialData.file_url}
+                        controls
+                        className="max-h-64 w-full rounded-lg border mt-2"
+                      />
+                    ) : (
+                      <img 
+                        src={initialData.file_url} 
+                        alt="Current file" 
+                        className="max-h-64 w-full object-contain rounded-lg border mt-2"
+                      />
+                    )
                   )}
                 </div>
               </FormControl>
               <FormDescription>
-                Upload a file related to this resource
+                Upload an image or video to display with this resource
               </FormDescription>
               <FormMessage />
             </FormItem>
