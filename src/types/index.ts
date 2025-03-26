@@ -20,4 +20,5 @@ export type ResourceFormData = {
   type: ResourceType;
   url?: string;
   file?: File | null;
+  file_path?: string;
 };

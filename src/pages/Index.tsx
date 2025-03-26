@@ -18,7 +18,7 @@ import {
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [typeFilter, setTypeFilter] = useState<string>('');
+  const [typeFilter, setTypeFilter] = useState<string>('all');
 
   // Fetch resources
   const { data: resources, isLoading, isError, refetch } = useQuery({
@@ -76,7 +76,7 @@ const Index = () => {
       resource.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
       resource.description.toLowerCase().includes(searchQuery.toLowerCase());
     
-    const matchesType = typeFilter === '' || resource.type === typeFilter;
+    const matchesType = typeFilter === 'all' || resource.type === typeFilter;
     
     return matchesSearch && matchesType;
   });
@@ -112,7 +112,7 @@ const Index = () => {
                   </div>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Types</SelectItem>
+                  <SelectItem value="all">All Types</SelectItem>
                   {resourceTypes.map((type) => (
                     <SelectItem key={type} value={type}>
                       {type}
@@ -136,7 +136,7 @@ const Index = () => {
           <div className="text-center py-16 bg-muted/50 rounded-lg">
             <h3 className="text-lg font-medium mb-2">No resources found</h3>
             <p className="text-muted-foreground">
-              {searchQuery || typeFilter ? 'Try adjusting your filters' : 'Add your first resource to get started'}
+              {searchQuery || typeFilter !== 'all' ? 'Try adjusting your filters' : 'Add your first resource to get started'}
             </p>
           </div>
         ) : (

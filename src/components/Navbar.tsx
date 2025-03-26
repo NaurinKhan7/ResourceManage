@@ -3,7 +3,14 @@ import { Link, useLocation } from 'react-router-dom';
 import { PlusCircle, BookOpen } from 'lucide-react';
 
 const Navbar = () => {
-  const location = useLocation();
+  // Use try-catch to prevent errors outside of Router context
+  let location = { pathname: '/' };
+  try {
+    location = useLocation();
+  } catch (error) {
+    console.error('Router error:', error);
+    // Fallback when not in Router context
+  }
 
   return (
     <div className="fixed top-0 left-0 right-0 z-50 glass-panel border-b shadow-sm">
